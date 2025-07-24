@@ -1,0 +1,3 @@
+bun typecheck
+bun lint
+bun format
