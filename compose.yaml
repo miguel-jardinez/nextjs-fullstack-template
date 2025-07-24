@@ -1,0 +1,59 @@
+services:
+  app:
+    depends_on:
+      db:
+        condition: service_healthy
+    build:
+      context: .
+      target: development
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+
+    develop:
+      watch:
+        # Files that require rebuild
+        - path: ./eslint.config.mjs
+          action: rebuild
+        - path: ./.prettierrc
+          action: rebuild
+        - path: ./package.json
+          action: rebuild
+        - path: ./bun.lock
+          action: rebuild
+        - path: ./next.config.ts
+          action: rebuild
+        - path: ./tsconfig.json
+          action: rebuild
+        - path: ./tailwind.config.ts
+          action: rebuild
+        # Source files for hot reload
+        - path: ./src
+          action: sync
+          target: /app/src
+        - path: ./public
+          action: sync
+          target: /app/public
+
+  db:
+    image: postgres:16-alpine
+    restart: always
+    shm_size: 256mb
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=db_local
+      - PGDATA=/var/lib/postgresql/data/pgdata
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d db_local"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  postgres_data:
