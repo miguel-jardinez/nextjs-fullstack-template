@@ -1,6 +1,6 @@
 {
   "name": "nextjs-fullstack-template",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": false,
   "description": "A modern, production-ready Next.js template with TypeScript, authentication, database, and comprehensive development tooling",
   "keywords": [
@@ -47,6 +47,7 @@
     "bun": ">=1.0.0"
   },
   "scripts": {
+    "dev:docker": "docker compose up --watch",
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
@@ -55,10 +56,11 @@
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
     "db:push": "drizzle-kit push",
+    "db:generate": "drizzle-kit generate",
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
-    "@hookform/resolvers": "^5.1.1",
+    "@hookform/resolvers": "^5.2.0",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",
     "@radix-ui/react-aspect-ratio": "^1.1.7",
@@ -100,14 +102,17 @@
     "lucide-react": "^0.525.0",
     "nanoid": "^5.1.5",
     "next": "15.4.3",
+    "next-intl": "^4.3.4",
     "next-themes": "^0.4.6",
     "pg": "^8.16.3",
     "react": "19.1.0",
     "react-day-picker": "^9.8.0",
     "react-dom": "19.1.0",
     "react-hook-form": "^7.61.0",
+    "react-icons": "^5.5.0",
     "react-resizable-panels": "^3.0.3",
     "recharts": "2.15.4",
+    "resend": "^4.7.0",
     "sonner": "^2.0.6",
     "tailwind-merge": "^3.3.1",
     "vaul": "^1.1.2",
