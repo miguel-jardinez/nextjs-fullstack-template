@@ -7,7 +7,7 @@
 [![Bun](https://img.shields.io/badge/Bun-1.0+-black)](https://bun.sh/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue)](https://www.docker.com/)
 
-A modern, production-ready Next.js template with TypeScript, authentication, database, and comprehensive development tooling.
+A modern, production-ready Next.js template with TypeScript, authentication, database, internationalization, and comprehensive development tooling.
 
 **🚀 Ready to use out of the box with everything you need for a full-stack application!**
 
@@ -33,20 +33,28 @@ A modern, production-ready Next.js template with TypeScript, authentication, dat
 - **Language**: TypeScript
 - **Runtime**: Bun (with Node.js fallback)
 - **Database**: PostgreSQL with Drizzle ORM
-- **Authentication**: Better Auth with email/password
+- **Authentication**: Better Auth with complete auth flow (sign-in, sign-up, forgot password, email verification)
 - **API**: tRPC for type-safe APIs
 - **UI**: Radix UI components with Tailwind CSS
 - **State Management**: TanStack Query (React Query)
+- **Internationalization**: Next-intl with Spanish and English support
+- **Email**: Resend integration for transactional emails
+- **Marketing**: Complete marketing pages with legal pages
 - **Code Quality**: ESLint, Prettier, SonarJS, Airbnb config
 - **Development**: Docker Compose with hot reload
 - **Deployment**: Multi-stage Dockerfile
+- **Architecture**: Modular folder structure for scalability
 
 ## 🎯 Why Choose This Template?
 
 - **⚡ Production Ready**: Built with best practices and security in mind
-- **🔒 Authentication**: Better Auth with email/password support out of the box
+- **🔒 Complete Authentication**: Better Auth with all auth flows (sign-in, sign-up, forgot password, email verification)
 - **🗄️ Database**: PostgreSQL with Drizzle ORM for type-safe queries
 - **🔗 Type Safety**: End-to-end type safety with tRPC
+- **🌍 Internationalization**: Built-in i18n support with Spanish and English
+- **📧 Email Integration**: Resend for transactional emails
+- **📄 Marketing Pages**: Complete marketing site with legal pages
+- **🏗️ Modular Architecture**: Scalable folder structure with modules
 - **🐳 Docker Ready**: Multi-stage builds for development and production
 - **🎨 Modern UI**: Radix UI components with Tailwind CSS
 - **📱 Responsive**: Mobile-first design approach
@@ -56,16 +64,20 @@ A modern, production-ready Next.js template with TypeScript, authentication, dat
 
 ### 🆚 Comparison with Other Templates
 
-| Feature              | This Template           | Others                    |
-| -------------------- | ----------------------- | ------------------------- |
-| **Authentication**   | ✅ Better Auth          | ❌ Manual setup           |
-| **Database**         | ✅ PostgreSQL + Drizzle | ❌ No DB or manual setup  |
-| **Type Safety**      | ✅ tRPC end-to-end      | ❌ Manual API setup       |
-| **Docker**           | ✅ Multi-stage ready    | ❌ Manual Docker setup    |
-| **Code Quality**     | ✅ ESLint + SonarJS     | ❌ Basic or none          |
-| **Versioning**       | ✅ Changesets           | ❌ Manual versioning      |
-| **UI Components**    | ✅ Radix UI + Tailwind  | ❌ Manual component setup |
-| **Production Ready** | ✅ Out of the box       | ❌ Requires setup         |
+| Feature                  | This Template           | Others                    |
+| ------------------------ | ----------------------- | ------------------------- |
+| **Authentication**       | ✅ Complete Auth Flow   | ❌ Manual setup           |
+| **Database**             | ✅ PostgreSQL + Drizzle | ❌ No DB or manual setup  |
+| **Type Safety**          | ✅ tRPC end-to-end      | ❌ Manual API setup       |
+| **Internationalization** | ✅ Next-intl ready      | ❌ Manual i18n setup      |
+| **Email Integration**    | ✅ Resend ready         | ❌ Manual email setup     |
+| **Marketing Pages**      | ✅ Complete setup       | ❌ Manual page setup      |
+| **Modular Structure**    | ✅ Modules architecture | ❌ Flat structure         |
+| **Docker**               | ✅ Multi-stage ready    | ❌ Manual Docker setup    |
+| **Code Quality**         | ✅ ESLint + SonarJS     | ❌ Basic or none          |
+| **Versioning**           | ✅ Changesets           | ❌ Manual versioning      |
+| **UI Components**        | ✅ Radix UI + Tailwind  | ❌ Manual component setup |
+| **Production Ready**     | ✅ Out of the box       | ❌ Requires setup         |
 
 ## 🛠️ Tech Stack
 
@@ -79,14 +91,16 @@ A modern, production-ready Next.js template with TypeScript, authentication, dat
 - **Lucide React** - Icon library
 - **React Hook Form** - Form handling
 - **Zod** - Schema validation
+- **Next-intl** - Internationalization
 
 ### Backend & API
 
 - **tRPC** - End-to-end typesafe APIs
-- **Better Auth** - Authentication library
+- **Better Auth** - Complete authentication library
 - **Drizzle ORM** - Type-safe database queries
 - **PostgreSQL** - Database
 - **TanStack Query** - Server state management
+- **Resend** - Email service
 
 ### Development Tools
 
@@ -102,6 +116,17 @@ A modern, production-ready Next.js template with TypeScript, authentication, dat
 ```
 ├── src/
 │   ├── app/                 # Next.js App Router
+│   │   ├── (marketing)/     # Marketing pages group
+│   │   │   ├── legals/      # Legal pages (privacy, terms, accessibility)
+│   │   │   ├── layout.tsx   # Marketing layout
+│   │   │   └── page.tsx     # Landing page
+│   │   ├── auth/           # Authentication pages
+│   │   │   ├── sign-in/    # Sign in page
+│   │   │   ├── sign-up/    # Sign up page
+│   │   │   ├── forget-password/ # Forgot password page
+│   │   │   ├── create-new-password/ # Reset password page
+│   │   │   ├── verify-email/ # Email verification page
+│   │   │   └── layout.tsx  # Auth layout
 │   │   ├── api/            # API routes
 │   │   │   ├── auth/       # Authentication endpoints
 │   │   │   └── trpc/       # tRPC endpoints
@@ -109,19 +134,46 @@ A modern, production-ready Next.js template with TypeScript, authentication, dat
 │   │   ├── layout.tsx      # Root layout
 │   │   └── page.tsx        # Home page
 │   ├── components/         # React components
-│   │   └── ui/            # Reusable UI components
+│   │   ├── ui/            # Reusable UI components (Radix UI)
+│   │   └── custom/        # Custom components
+│   │       ├── language-selector/ # Language switcher
+│   │       ├── theme-switcher/   # Theme switcher
+│   │       └── default-card/     # Default card component
+│   ├── modules/           # Feature modules (recommended structure)
+│   │   ├── auth/          # Authentication module
+│   │   │   ├── sign-in/   # Sign in feature
+│   │   │   │   ├── schema.ts # Validation schema
+│   │   │   │   └── ui/    # UI components
+│   │   │   │       ├── components/ # Feature components
+│   │   │   │       └── views/     # Page views
+│   │   │   ├── sign-up/   # Sign up feature
+│   │   │   ├── forget-password/ # Forgot password feature
+│   │   │   ├── create-new-password/ # Reset password feature
+│   │   │   └── verify-email/ # Email verification feature
+│   │   └── resend/        # Email module
+│   │       └── ui/        # Email templates
+│   │           └── templates/ # Email templates
 │   ├── db/                # Database configuration
 │   │   ├── index.ts       # Database connection
 │   │   └── schema.ts      # Database schema
 │   ├── hooks/             # Custom React hooks
+│   ├── i18n/              # Internationalization
+│   │   ├── config.ts      # i18n configuration
+│   │   └── request.ts     # i18n request handler
 │   ├── lib/               # Utility libraries
 │   │   ├── auth.ts        # Authentication setup
+│   │   ├── auth-client.ts # Client-side auth
 │   │   └── utils.ts       # Utility functions
+│   ├── services/          # Service layer
+│   │   └── locale.ts      # Locale service
 │   └── trpc/              # tRPC configuration
 │       ├── routers/       # API route handlers
 │       ├── client.tsx     # Client-side tRPC
 │       └── server.ts      # Server-side tRPC
 ├── public/                # Static assets
+├── messages/              # i18n message files
+│   ├── en.json           # English translations
+│   └── es.json           # Spanish translations
 ├── Dockerfile            # Multi-stage Docker build
 ├── compose.yaml          # Docker Compose configuration
 ├── drizzle.config.ts     # Database migration config
@@ -179,6 +231,12 @@ NEXTAUTH_SECRET="your-nextauth-secret"
 
 # Public Environment Variables
 NEXT_PUBLIC_AUTH_URL="http://localhost:3000"
+
+# Email (Resend)
+RESEND_API_KEY="your-resend-api-key"
+
+# Internationalization
+NEXT_LOCALE="es" # Default locale
 ```
 
 **Note**: Create a `.env.template` file in your project root with the same structure but without sensitive values, so other developers can copy it to create their own `.env` file.
@@ -207,6 +265,135 @@ docker compose up
 ```
 
 The application will be available at `http://localhost:3000`
+
+## 🏗️ Modular Architecture
+
+This template uses a **modular folder structure** that is highly recommended for scalability and maintainability:
+
+### Module Structure
+
+Each feature is organized as a module in `src/modules/`:
+
+```
+src/modules/
+├── auth/                    # Authentication module
+│   ├── sign-in/            # Sign in feature
+│   │   ├── schema.ts       # Validation schemas
+│   │   └── ui/             # UI components
+│   │       ├── components/ # Reusable components
+│   │       └── views/      # Page views
+│   ├── sign-up/            # Sign up feature
+│   ├── forget-password/    # Forgot password feature
+│   ├── create-new-password/ # Reset password feature
+│   └── verify-email/       # Email verification feature
+├── resend/                 # Email module
+│   └── ui/                 # Email templates
+│       └── templates/      # Email templates
+└── [future-modules]/       # Additional feature modules
+```
+
+### Benefits of Modular Structure
+
+- **Scalability**: Easy to add new features without cluttering
+- **Maintainability**: Clear separation of concerns
+- **Reusability**: Components can be shared between modules
+- **Testing**: Easier to test individual features
+- **Team Collaboration**: Different teams can work on different modules
+
+### Adding New Modules
+
+When adding new features, follow this structure:
+
+```bash
+src/modules/
+└── your-feature/
+    ├── schema.ts           # Validation schemas
+    ├── types.ts            # TypeScript types
+    ├── server/             # TRPC procedures
+    ├── ui/                 # UI components
+    │   ├── components/     # Reusable components
+    │   └── views/          # Page views
+    └── hooks/              # Custom hooks
+```
+
+## 🌍 Internationalization (i18n)
+
+The template includes complete internationalization support with Next-intl:
+
+### Supported Languages
+
+- **Spanish (es)** - Default language
+- **English (en)** - Secondary language
+
+### Configuration
+
+```typescript
+// src/i18n/config.ts
+export const locales = ["es", "en"] as const;
+export const defaultLocale: Locale = "es";
+```
+
+### Usage
+
+```typescript
+// In components
+import { useTranslations } from 'next-intl';
+
+export function MyComponent() {
+  const t = useTranslations('common');
+  return <h1>{t('title')}</h1>;
+}
+```
+
+### Language Switching
+
+Use the built-in language selector component:
+
+```typescript
+import { LanguageSelector } from "@template/components/custom/language-selector";
+```
+
+## 🔐 Authentication Features
+
+The template includes a complete authentication system with Better Auth:
+
+### Available Auth Pages
+
+- **Sign In** (`/auth/sign-in`) - User login
+- **Sign Up** (`/auth/sign-up`) - User registration
+- **Forgot Password** (`/auth/forget-password`) - Password recovery
+- **Create New Password** (`/auth/create-new-password`) - Password reset
+- **Verify Email** (`/auth/verify-email`) - Email verification
+
+### Email Integration
+
+Transactional emails are handled by Resend:
+
+- **Account Confirmation** - Email verification
+- **Password Reset** - Password recovery emails
+
+### Auth Flow
+
+1. **Registration**: User signs up with email/password
+2. **Email Verification**: User receives confirmation email
+3. **Login**: User can sign in after email verification
+4. **Password Recovery**: User can reset password via email
+5. **Session Management**: Secure session handling
+
+## 📄 Marketing Pages
+
+Complete marketing site with legal pages:
+
+### Available Pages
+
+- **Landing Page** (`/`) - Main marketing page
+- **Privacy Policy** (`/legals/privacy-policy`) - Privacy policy
+- **Terms & Conditions** (`/legals/terms-and-conditions`) - Terms of service
+- **Accessibility Policy** (`/legals/accessibility-policy`) - Accessibility statement
+
+### Customization
+
+Update the marketing content in `src/app/(marketing)/` to match your brand and requirements.
 
 ## 🐳 Docker Development
 
@@ -336,6 +523,7 @@ docker compose down  # Stop development environment
 - **API**: Type-safe endpoints with tRPC
 - **Docker**: Non-root user in production containers
 - **Environment**: Secure environment variable handling
+- **Email**: Secure transactional emails with Resend
 
 ## 🚀 Deployment
 
@@ -355,6 +543,7 @@ docker build -t my-app .
 docker run -p 3000:3000 \
   -e DATABASE_URL="your-db-url" \
   -e AUTH_SECRET="your-secret" \
+  -e RESEND_API_KEY="your-resend-key" \
   my-app
 ```
 
@@ -366,6 +555,8 @@ AUTH_SECRET="your-secure-secret-key"
 AUTH_URL="https://your-domain.com"
 NEXTAUTH_URL="https://your-domain.com"
 NEXTAUTH_SECRET="your-nextauth-secret"
+RESEND_API_KEY="your-resend-api-key"
+NEXT_LOCALE="es"
 ```
 
 ## 🤝 Contributing
@@ -386,10 +577,14 @@ When using this project as a template for a new project:
 4. **Update project details**:
    - Change project name in `package.json`
    - Update version from `0.0.0` to `1.0.0` or your starting version
-   - Update project alias in `tsconfig.json` (currently `@expenses`)
+   - Update project alias in `tsconfig.json` (currently `@template`)
    - Update project alias in `eslint.config.mjs`
 5. **Create environment files**: Copy `.env.template` to `.env` and configure
-6. **Start development**: `bun run dev`
+6. **Customize content**:
+   - Update marketing pages in `src/app/(marketing)/`
+   - Customize email templates in `src/modules/resend/ui/templates/`
+   - Update i18n messages in `messages/` folder
+7. **Start development**: `bun run dev`
 
 This ensures a clean git history and proper project timeline for your new application.
 
@@ -404,7 +599,8 @@ For questions and support:
 1. Check the [Next.js documentation](https://nextjs.org/docs)
 2. Review [tRPC documentation](https://trpc.io/docs)
 3. Check [Better Auth documentation](https://better-auth.com)
-4. Open an issue in this repository
+4. Review [Next-intl documentation](https://next-intl-docs.vercel.app/)
+5. Open an issue in this repository
 
 ## 🔄 Updates
 

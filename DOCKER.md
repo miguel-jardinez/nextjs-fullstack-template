@@ -1,10 +1,10 @@
 # Docker Configuration Guide
 
-This document explains the Docker setup for the Next.js template, including development and production configurations.
+This document explains the Docker setup for the Next.js template, including development and production configurations with support for internationalization, email services, and modular architecture.
 
 ## 🐳 Overview
 
-The project uses a multi-stage Dockerfile optimized for both development and production environments, along with Docker Compose for local development.
+The project uses a multi-stage Dockerfile optimized for both development and production environments, along with Docker Compose for local development. The setup includes support for internationalization, email services, and the modular folder structure.
 
 ## 📁 Docker Files
 
@@ -37,7 +37,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 RUN bun run build
 ```
 
-**Purpose**: Builds the Next.js application for production with optimized output.
+**Purpose**: Builds the Next.js application for production with optimized output, including internationalization and email templates.
 
 ### Stage 3: Production Runtime (`runner`)
 
@@ -54,6 +54,7 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=builder /app/messages ./messages
 
 USER nextjs
 EXPOSE 3000
@@ -62,7 +63,7 @@ ENV HOSTNAME="0.0.0.0"
 CMD ["node", "server.js"]
 ```
 
-**Purpose**: Creates the final production image with minimal footprint and security best practices.
+**Purpose**: Creates the final production image with minimal footprint and security best practices, including internationalization message files.
 
 ### Stage 4: Development (`development`)
 
@@ -75,7 +76,7 @@ EXPOSE 3000
 CMD ["bun", "run", "dev"]
 ```
 
-**Purpose**: Optimized development environment with hot reload capabilities.
+**Purpose**: Optimized development environment with hot reload capabilities for all features including modules, i18n, and email templates.
 
 ## 🚀 Docker Compose Development
 
@@ -110,11 +111,16 @@ app:
       - path: ./src
         action: sync
         target: /app/src
+      # Internationalization files
+      - path: ./messages
+        action: sync
+        target: /app/messages
 ```
 
 **Features**:
 
-- Hot reload for source files
+- Hot reload for source files and modules
+- Internationalization message file synchronization
 - Automatic rebuilds for configuration changes
 - Health check dependency on database
 - Environment variable injection
@@ -180,6 +186,8 @@ docker build -t my-app .
 docker run -p 3000:3000 \
   -e DATABASE_URL="your-db-url" \
   -e AUTH_SECRET="your-secret" \
+  -e RESEND_API_KEY="your-resend-key" \
+  -e NEXT_LOCALE="es" \
   my-app
 
 # Build with specific target
@@ -207,12 +215,14 @@ docker compose exec -T db psql -U postgres -d expenses_db_local < backup.sql
 - **Minimal attack surface**: Only necessary files copied to final image
 - **Standalone output**: Next.js standalone build for optimized deployment
 - **Environment isolation**: Separate stages prevent development dependencies in production
+- **Email security**: Secure Resend API integration
 
 ### Development Security
 
 - **Volume isolation**: Database data persisted in named volumes
 - **Network isolation**: Services communicate through Docker network
 - **Health checks**: Ensures database is ready before app starts
+- **Environment variables**: Secure credential management
 
 ## 📊 Performance Optimizations
 
@@ -222,12 +232,14 @@ docker compose exec -T db psql -U postgres -d expenses_db_local < backup.sql
 - **Multi-stage builds**: Reduces final image size
 - **Standalone output**: Next.js optimized for container deployment
 - **Alpine base**: Lightweight base images
+- **Internationalization**: Optimized message file loading
 
 ### Runtime Optimizations
 
 - **Shared memory**: PostgreSQL configured with adequate shared memory
 - **Health checks**: Prevents startup race conditions
 - **Hot reload**: Development environment optimized for fast feedback
+- **Module structure**: Efficient feature module loading
 
 ## 🌍 Environment Variables
 
@@ -240,6 +252,8 @@ AUTH_URL="https://your-domain.com"
 NEXTAUTH_URL="https://your-domain.com"
 NEXTAUTH_SECRET="your-nextauth-secret"
 NEXT_PUBLIC_AUTH_URL="https://your-domain.com"
+RESEND_API_KEY="your-resend-api-key"
+NEXT_LOCALE="es"
 ```
 
 ### Development Defaults
@@ -251,11 +265,43 @@ AUTH_URL="http://localhost:3000"
 NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="dev-nextauth-secret"
 NEXT_PUBLIC_AUTH_URL="http://localhost:3000"
+RESEND_API_KEY="your-resend-api-key"
+NEXT_LOCALE="es"
 ```
 
 ### Environment Template
 
 Create a `.env.template` file in your project root with the structure above but without sensitive values, so other developers can copy it to create their own `.env` file.
+
+## 🏗️ Modular Architecture Support
+
+### Module Structure in Docker
+
+The Docker setup supports the modular architecture:
+
+```dockerfile
+# Copy modules for development
+COPY --from=builder /app/src/modules ./src/modules
+
+# Copy internationalization files
+COPY --from=builder /app/messages ./messages
+
+# Copy email templates
+COPY --from=builder /app/src/modules/resend ./src/modules/resend
+```
+
+### Development Workflow
+
+```bash
+# Hot reload for modules
+docker compose up
+
+# Module-specific development
+# The modular structure allows for:
+# - Independent module development
+# - Shared component reuse
+# - Scalable architecture
+```
 
 ## 🔄 CI/CD Integration
 
@@ -334,6 +380,16 @@ docker compose build --no-cache
 docker compose build --progress=plain
 ```
 
+#### Internationalization Issues
+
+```bash
+# Check message files
+docker compose exec app ls -la /app/messages
+
+# Verify locale configuration
+docker compose exec app cat /app/src/i18n/config.ts
+```
+
 ### Debug Commands
 
 ```bash
@@ -400,6 +456,67 @@ docker volume prune
 docker system prune -a
 ```
 
+## 📧 Email Service Integration
+
+### Resend Configuration
+
+The Docker setup includes Resend email service integration:
+
+```yaml
+# Environment variables for email service
+environment:
+  - RESEND_API_KEY=${RESEND_API_KEY}
+```
+
+### Email Templates
+
+Email templates are included in the build:
+
+```dockerfile
+# Copy email templates
+COPY --from=builder /app/src/modules/resend ./src/modules/resend
+```
+
+### Email Service Health
+
+```bash
+# Check email service configuration
+docker compose exec app echo $RESEND_API_KEY
+
+# Test email service
+docker compose exec app curl -X POST http://localhost:3000/api/email/test
+```
+
+## 🌍 Internationalization Support
+
+### Message Files
+
+Internationalization message files are included in the Docker image:
+
+```dockerfile
+# Copy internationalization files
+COPY --from=builder /app/messages ./messages
+```
+
+### Locale Configuration
+
+```bash
+# Set default locale
+export NEXT_LOCALE="es"
+
+# Check available locales
+docker compose exec app ls -la /app/messages
+```
+
+### Language Switching
+
+The Docker setup supports real-time language switching:
+
+```bash
+# Update locale in running container
+docker compose exec app sh -c "echo 'es' > /tmp/locale"
+```
+
 ---
 
-This Docker configuration provides a robust, secure, and performant environment for both development and production deployments.
+This Docker configuration provides a robust, secure, and performant environment for both development and production deployments, with full support for the modular architecture, internationalization, email services, and authentication features.

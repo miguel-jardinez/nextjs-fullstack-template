@@ -1,6 +1,6 @@
 # Technical Architecture
 
-This document provides a detailed overview of the technical architecture, backend configuration, authentication system, and database design.
+This document provides a detailed overview of the technical architecture, backend configuration, authentication system, database design, and modular structure.
 
 ## 🏗️ System Architecture
 
@@ -14,7 +14,69 @@ This document provides a detailed overview of the technical architecture, backen
 │ • React 19      │    │ • tRPC Server   │    │ • Drizzle ORM   │
 │ • TypeScript    │    │ • Better Auth   │    │ • Schema        │
 │ • Tailwind CSS  │    │ • API Routes    │    │ • Migrations    │
+│ • Next-intl     │    │ • Email Service │    │                 │
+│ • Marketing     │    │ • i18n Support  │    │                 │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
+```
+
+## 🏗️ Modular Architecture
+
+### Recommended Folder Structure
+
+This template uses a **modular architecture** that promotes scalability, maintainability, and clear separation of concerns:
+
+```
+src/
+├── modules/              # Feature modules (recommended structure)
+│   ├── auth/            # Authentication module
+│   │   ├── sign-in/     # Sign in feature
+│   │   │   ├── schema.ts # Validation schemas
+│   │   │   └── ui/      # UI components
+│   │   │       ├── components/ # Reusable components
+│   │   │       └── views/      # Page views
+│   │   ├── sign-up/     # Sign up feature
+│   │   ├── forget-password/ # Forgot password feature
+│   │   ├── create-new-password/ # Reset password feature
+│   │   └── verify-email/ # Email verification feature
+│   ├── resend/          # Email module
+│   │   └── ui/          # Email templates
+│   │       └── templates/ # Email templates
+│   └── [future-modules]/ # Additional feature modules
+├── app/                 # Next.js App Router
+├── components/          # Shared components
+├── lib/                 # Utility libraries
+├── services/            # Service layer
+└── i18n/               # Internationalization
+```
+
+### Module Structure Benefits
+
+- **Scalability**: Easy to add new features without cluttering
+- **Maintainability**: Clear separation of concerns
+- **Reusability**: Components can be shared between modules
+- **Testing**: Easier to test individual features
+- **Team Collaboration**: Different teams can work on different modules
+
+### Module Organization Pattern
+
+Each module follows a consistent structure:
+
+```typescript
+src/modules/your-feature/
+├── schema.ts           # Validation schemas (Zod)
+├── types.ts            # TypeScript type definitions
+├── api/                # API handlers (tRPC routers)
+│   └── router.ts       # Feature-specific router
+├── ui/                 # UI components
+│   ├── components/     # Reusable components
+│   │   ├── feature-form.tsx
+│   │   └── feature-card.tsx
+│   └── views/          # Page views
+│       └── feature-view.tsx
+├── hooks/              # Custom React hooks
+│   └── use-feature.ts
+└── utils/              # Feature-specific utilities
+    └── helpers.ts
 ```
 
 ## 🔧 Backend Configuration
@@ -40,7 +102,7 @@ export const trpc = createTRPCOptionsProxy({
 #### Context Creation (`src/trpc/init.ts`)
 
 ```typescript
-import { auth } from "@expenses/lib/auth";
+import { auth } from "@template/lib/auth";
 
 export const createTRPCContext = async (opts: { headers: Headers }) => {
   const session = await auth.api.getSession({
@@ -76,8 +138,8 @@ export type AppRouter = typeof appRouter;
 
 ```typescript
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
-import { appRouter } from "@expenses/trpc/routers/_app";
-import { createTRPCContext } from "@expenses/trpc/init";
+import { appRouter } from "@template/trpc/routers/_app";
+import { createTRPCContext } from "@template/trpc/init";
 
 const handler = (req: Request) =>
   fetchRequestHandler({
@@ -93,7 +155,7 @@ export { handler as GET, handler as POST };
 #### Authentication API (`src/app/api/auth/[...all]/route.ts`)
 
 ```typescript
-import { auth } from "@expenses/lib/auth";
+import { auth } from "@template/lib/auth";
 
 export const { GET, POST } = auth.api;
 ```
@@ -102,14 +164,14 @@ export const { GET, POST } = auth.api;
 
 ### Better Auth Configuration
 
-The authentication system uses Better Auth with email/password support:
+The authentication system uses Better Auth with complete email/password support:
 
 #### Auth Setup (`src/lib/auth.ts`)
 
 ```typescript
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { db } from "@expenses/db";
+import { db } from "@template/db";
 
 export const auth = betterAuth({
   emailAndPassword: {
@@ -131,13 +193,27 @@ export const authClient = createAuthClient({
 });
 ```
 
-### Authentication Flow
+### Authentication Features
+
+The template includes a complete authentication flow:
+
+#### Available Auth Pages
+
+- **Sign In** (`/auth/sign-in`) - User login with email/password
+- **Sign Up** (`/auth/sign-up`) - User registration with email verification
+- **Forgot Password** (`/auth/forget-password`) - Password recovery via email
+- **Create New Password** (`/auth/create-new-password`) - Password reset form
+- **Verify Email** (`/auth/verify-email`) - Email verification page
+
+#### Authentication Flow
 
 1. **Registration**: User creates account with email/password
-2. **Login**: User authenticates with credentials
-3. **Session Management**: Better Auth handles session tokens
-4. **Authorization**: tRPC context validates user sessions
-5. **Logout**: Session invalidation and cleanup
+2. **Email Verification**: User receives confirmation email
+3. **Login**: User authenticates with verified credentials
+4. **Session Management**: Better Auth handles secure session tokens
+5. **Password Recovery**: User can reset password via email
+6. **Authorization**: tRPC context validates user sessions
+7. **Logout**: Session invalidation and cleanup
 
 ### Protected Routes
 
@@ -156,6 +232,186 @@ export const protectedProcedure = t.procedure.use(
     });
   }),
 );
+```
+
+## 📧 Email Integration
+
+### Resend Configuration
+
+The template includes Resend integration for transactional emails:
+
+#### Email Templates
+
+```typescript
+// src/modules/resend/ui/templates/confirm-account.tsx
+export function ConfirmAccountEmail({
+  user,
+  verificationUrl
+}: ConfirmAccountEmailProps) {
+  return (
+    <div>
+      <h1>Confirm your account</h1>
+      <p>Hi {user.name},</p>
+      <p>Please confirm your account by clicking the link below:</p>
+      <a href={verificationUrl}>Confirm Account</a>
+    </div>
+  );
+}
+```
+
+#### Available Email Templates
+
+- **Account Confirmation** - Email verification for new users
+- **Password Reset** - Password recovery emails
+- **Welcome Email** - Welcome message for new users
+
+## 🌍 Internationalization (i18n)
+
+### Next-intl Configuration
+
+The template includes complete internationalization support:
+
+#### Configuration (`src/i18n/config.ts`)
+
+```typescript
+export type Locale = (typeof locales)[number];
+
+export const locales = ["es", "en"] as const;
+export const defaultLocale: Locale = "es";
+```
+
+#### Request Handler (`src/i18n/request.ts`)
+
+```typescript
+import { getRequestConfig } from "next-intl/server";
+import { getUserLocale } from "../services/locale";
+
+export default getRequestConfig(async () => {
+  const locale = await getUserLocale();
+
+  return {
+    locale,
+    messages: (await import(`../../messages/${locale}.json`)).default,
+  };
+});
+```
+
+#### Locale Service (`src/services/locale.ts`)
+
+```typescript
+"use server";
+
+import { cookies } from "next/headers";
+import { defaultLocale, Locale } from "@template/i18n/config";
+
+const COOKIE_NAME = "NEXT_LOCALE";
+
+export async function getUserLocale() {
+  return (await cookies()).get(COOKIE_NAME)?.value || defaultLocale;
+}
+
+export async function setUserLocale(locale: Locale) {
+  (await cookies()).set(COOKIE_NAME, locale);
+}
+```
+
+### Supported Languages
+
+- **Spanish (es)** - Default language
+- **English (en)** - Secondary language
+
+### Usage Examples
+
+```typescript
+// In components
+import { useTranslations } from 'next-intl';
+
+export function MyComponent() {
+  const t = useTranslations('common');
+  return <h1>{t('title')}</h1>;
+}
+
+// Language switching
+import { LanguageSelector } from '@template/components/custom/language-selector';
+```
+
+## 📄 Marketing Pages
+
+### Marketing Structure
+
+The template includes a complete marketing site:
+
+#### Marketing Layout (`src/app/(marketing)/layout.tsx`)
+
+```typescript
+export default function MarketingLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+      <main>{children}</main>
+      <Footer />
+    </div>
+  );
+}
+```
+
+#### Available Marketing Pages
+
+- **Landing Page** (`/`) - Main marketing page with hero section
+- **Privacy Policy** (`/legals/privacy-policy`) - Privacy policy page
+- **Terms & Conditions** (`/legals/terms-and-conditions`) - Terms of service
+- **Accessibility Policy** (`/legals/accessibility-policy`) - Accessibility statement
+
+### Custom Components
+
+The template includes custom components for enhanced functionality:
+
+#### Language Selector (`src/components/custom/language-selector/`)
+
+```typescript
+export function LanguageSelector() {
+  const [locale, setLocale] = useState<Locale>("es");
+
+  const handleLocaleChange = async (newLocale: Locale) => {
+    await setUserLocale(newLocale);
+    setLocale(newLocale);
+  };
+
+  return (
+    <Select value={locale} onValueChange={handleLocaleChange}>
+      <SelectTrigger>
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectItem value="es">Español</SelectItem>
+        <SelectItem value="en">English</SelectItem>
+      </SelectContent>
+    </Select>
+  );
+}
+```
+
+#### Theme Switcher (`src/components/custom/theme-switcher/`)
+
+```typescript
+export function ThemeSwitcher() {
+  const { theme, setTheme } = useTheme();
+
+  return (
+    <Button
+      variant="ghost"
+      size="icon"
+      onClick={() => setTheme(theme === "light" ? "dark" : "light")}
+    >
+      <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+      <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+    </Button>
+  );
+}
 ```
 
 ## 🗄️ Database Design
@@ -320,9 +576,13 @@ src/
 │   │   ├── button.tsx
 │   │   ├── input.tsx
 │   │   └── ...
-│   └── ...              # Feature-specific components
+│   └── custom/          # Custom components
+│       ├── language-selector/ # Language switcher
+│       ├── theme-switcher/   # Theme switcher
+│       └── default-card/     # Default card component
 ├── hooks/               # Custom React hooks
 ├── lib/                 # Utility libraries
+├── modules/             # Feature modules (recommended)
 └── app/                 # Next.js App Router pages
 ```
 
@@ -332,6 +592,7 @@ src/
 - **Radix UI**: Accessible component primitives
 - **CSS Variables**: For theming and customization
 - **Responsive Design**: Mobile-first approach
+- **Dark Mode**: Built-in theme switching
 
 ### Type Safety
 
@@ -347,6 +608,7 @@ src/
 - **Session Management**: Secure session tokens with expiration
 - **Password Hashing**: Better Auth handles secure password storage
 - **CSRF Protection**: Built-in CSRF protection
+- **Email Verification**: Required email verification for new accounts
 - **Rate Limiting**: API rate limiting (can be added)
 
 ### Database Security
@@ -360,6 +622,7 @@ src/
 - **Type Safety**: tRPC prevents runtime errors
 - **Input Validation**: Zod schema validation
 - **Authorization**: Protected procedures for sensitive operations
+- **Email Security**: Secure transactional emails with Resend
 
 ## 📊 Performance Optimizations
 
@@ -369,6 +632,7 @@ src/
 - **React 19**: Concurrent features and improvements
 - **Code Splitting**: Automatic route-based code splitting
 - **Image Optimization**: Next.js Image component
+- **Internationalization**: Optimized i18n loading
 
 ### Backend Performance
 
@@ -376,6 +640,7 @@ src/
 - **Query Caching**: TanStack Query caching
 - **Database Indexing**: Optimized database queries
 - **Connection Pooling**: Efficient database connections
+- **Email Queuing**: Asynchronous email processing
 
 ### Build Optimizations
 
@@ -394,6 +659,7 @@ src/
 4. **Type Checking**: Real-time TypeScript validation
 5. **Linting**: ESLint with automatic fixes
 6. **Formatting**: Prettier with organized imports
+7. **Internationalization**: Real-time i18n updates
 
 ### Testing Strategy
 
@@ -401,6 +667,7 @@ src/
 - **Integration Tests**: API endpoint testing
 - **E2E Tests**: Full application testing
 - **Type Testing**: TypeScript compilation testing
+- **i18n Testing**: Translation coverage testing
 
 ### Deployment Pipeline
 
@@ -427,6 +694,12 @@ NEXTAUTH_SECRET="your-nextauth-secret"
 
 # Public Environment Variables
 NEXT_PUBLIC_AUTH_URL="http://localhost:3000"
+
+# Email (Resend)
+RESEND_API_KEY="your-resend-api-key"
+
+# Internationalization
+NEXT_LOCALE="es" # Default locale
 ```
 
 **Environment Template**: Create a `.env.template` file with the same structure but without sensitive values for team collaboration.
@@ -437,6 +710,7 @@ NEXT_PUBLIC_AUTH_URL="http://localhost:3000"
 - **TypeScript Config**: Strict type checking
 - **ESLint Config**: Comprehensive code quality rules
 - **Prettier Config**: Consistent code formatting
+- **i18n Config**: Internationalization settings
 
 ### Version Management
 
@@ -452,13 +726,15 @@ NEXT_PUBLIC_AUTH_URL="http://localhost:3000"
 - **Application Logs**: Structured logging
 - **Error Tracking**: Error boundary and monitoring
 - **Performance Monitoring**: Core Web Vitals tracking
+- **Email Logging**: Transactional email tracking
 
 ### Health Checks
 
 - **Database Health**: Connection and query health
 - **API Health**: Endpoint availability
 - **Application Health**: Overall system status
+- **Email Service**: Resend API health monitoring
 
 ---
 
-This architecture provides a robust, scalable, and maintainable foundation for modern web applications with type safety, security, and performance at its core.
+This architecture provides a robust, scalable, and maintainable foundation for modern web applications with type safety, security, internationalization, and performance at its core. The modular structure ensures easy scalability and maintainability as your application grows.
