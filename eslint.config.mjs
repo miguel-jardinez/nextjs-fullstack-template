@@ -63,6 +63,7 @@ const eslintConfig = [
       // https://github.com/SonarSource/eslint-plugin-sonarjs#recommended-rules
       ...sonarjs.configs.recommended.rules,
       "sonarjs/void-use": "off",
+      "sonarjs/todo-tag": "off",
 
       // ========================================
       // PRETTIER INTEGRATION
