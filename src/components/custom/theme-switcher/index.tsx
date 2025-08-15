@@ -1,10 +1,11 @@
 "use client";
 
 import { useId } from "react";
-import { Label } from "@template/components/ui/label";
-import { Switch } from "@template/components/ui/switch";
 import { MoonIcon, SunIcon } from "lucide-react";
 import { useTheme } from "next-themes";
+
+import { Label } from "@template/components/ui/label";
+import { Switch } from "@template/components/ui/switch";
 
 export type ThemeSwitcherProps = {} & React.ComponentProps<typeof Switch>;
 

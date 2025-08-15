@@ -1,0 +1,162 @@
+name: Version Check
+
+on:
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "src/**"
+      - "components/**"
+      - "lib/**"
+      - "modules/**"
+      - "*.tsx"
+      - "*.ts"
+      - "*.jsx"
+      - "*.js"
+
+jobs:
+  version-check:
+    name: Check Package.json Version
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "21"
+
+      - name: Check package.json version change
+        id: version-check
+        run: |
+          # Get the current package.json version
+          current_version=$(node -p "require('./package.json').version")
+          echo "current_version=$current_version" >> $GITHUB_OUTPUT
+
+          # Get the package.json version from main branch
+          git fetch origin main:main
+          main_version=$(git show main:package.json | node -p "JSON.parse(require('fs').readFileSync('/dev/stdin', 'utf8')).version")
+          echo "main_version=$main_version" >> $GITHUB_OUTPUT
+
+          # Compare versions
+          if [ "$current_version" != "$main_version" ]; then
+            echo "version_changed=true" >> $GITHUB_OUTPUT
+            echo "✅ Package.json version changed from $main_version to $current_version"
+          else
+            echo "version_changed=false" >> $GITHUB_OUTPUT
+            echo "❌ Package.json version has not changed (still $current_version)"
+          fi
+
+      - name: Check if changes require version bump
+        id: require-version
+        run: |
+          # Check if there are changes in source code that require versioning
+          changed_files=$(git diff --name-only origin/main...HEAD)
+          echo "📋 Changed files in this PR:"
+          echo "$changed_files"
+          echo ""
+
+          # Define patterns that require version changes (excluding package.json itself)
+          version_required_patterns="^(src/|components/|lib/|modules/|.*\.tsx?$|.*\.jsx?$)"
+
+          requires_version=false
+          relevant_files=""
+          while IFS= read -r file; do
+            if echo "$file" | grep -E "$version_required_patterns" > /dev/null; then
+              requires_version=true
+              relevant_files="$relevant_files\n  - $file"
+            fi
+          done <<< "$changed_files"
+
+          echo "requires_version=$requires_version" >> $GITHUB_OUTPUT
+
+          if [ "$requires_version" = "true" ]; then
+            echo "📋 Files that require version bump:"
+            echo -e "$relevant_files"
+          else
+            echo "📋 No source code changes detected that require version bump"
+          fi
+
+      - name: Validate version requirements
+        run: |
+          requires_version="${{ steps.require-version.outputs.requires_version }}"
+          version_changed="${{ steps.version-check.outputs.version_changed }}"
+
+          echo ""
+          echo "🔍 Version Check Summary:"
+          echo "  - Source code changes detected: $requires_version"
+          echo "  - Package.json version changed: $version_changed"
+          echo "  - Current version: ${{ steps.version-check.outputs.current_version }}"
+          echo "  - Main branch version: ${{ steps.version-check.outputs.main_version }}"
+          echo ""
+
+          if [ "$requires_version" = "true" ] && [ "$version_changed" = "false" ]; then
+            echo "❌ ERROR: Source code changes detected but package.json version unchanged!"
+            echo ""
+            echo "🚨 This PR modifies source code but the version in package.json is the same as main branch."
+            echo "   You must update the version before this PR can be merged."
+            echo ""
+            exit 1
+          elif [ "$requires_version" = "true" ] && [ "$version_changed" = "true" ]; then
+            echo "✅ SUCCESS: Source code changes detected and package.json version updated!"
+          else
+            echo "✅ SUCCESS: No source code changes requiring version bump."
+          fi
+
+      - name: Post PR comment
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const pr_number = context.payload.pull_request.number;
+
+            const comment = \`## ❌ Version Check Failed
+
+            This PR contains source code changes but the \`package.json\` version has not been updated.
+
+            ### 📋 Current Status:
+            - **Main branch version:** \`${{ steps.version-check.outputs.main_version }}\`
+            - **Your branch version:** \`${{ steps.version-check.outputs.current_version }}\`
+            - **Source code changes detected:** ${{ steps.require-version.outputs.requires_version }}
+
+            ### 🔧 How to fix this locally:
+
+            **Option 1: Use bunx version (Recommended)**
+            \\\`\\\`\\\`bash
+            # For patch changes (bug fixes)
+            bunx npm version patch
+
+            # For minor changes (new features)
+            bunx npm version minor
+
+            # For major changes (breaking changes)
+            bunx npm version major
+
+            # Then push the changes
+            git push origin your-branch-name
+            \\\`\\\`\\\`
+
+            **Option 2: Manual Update**
+            1. Open \`package.json\`
+            2. Update the \`version\` field (current: \`${{ steps.version-check.outputs.main_version }}\`)
+            3. Save and commit the changes
+            4. Push to your branch
+
+            ### 📚 Versioning Guidelines:
+            - **Patch** (1.0.0 → 1.0.1): Bug fixes, small improvements
+            - **Minor** (1.0.0 → 1.1.0): New features, non-breaking changes
+            - **Major** (1.0.0 → 2.0.0): Breaking changes
+
+            > **Note:** Don't forget to update your \`CHANGELOG.md\` if you have one!
+            \`;
+
+            github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: pr_number,
+              body: comment
+            });

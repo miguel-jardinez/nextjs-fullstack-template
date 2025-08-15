@@ -1,0 +1,115 @@
+name: Code Quality Check
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+jobs:
+  code-quality:
+    name: TypeCheck, Lint & Format
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "21"
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: "1.2.0"
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: TypeScript Type Check
+        run: |
+          echo "🔍 Running TypeScript type check..."
+          bun typecheck
+
+      - name: ESLint Check
+        run: |
+          echo "🔍 Running ESLint..."
+          bun lint
+
+      - name: Format Check
+        run: |
+          echo "🔍 Running format check..."
+          bun format
+
+      - name: Success Summary
+        if: success()
+        run: |
+          echo ""
+          echo "✅ All code quality checks passed!"
+          echo "  - TypeScript: ✅ No type errors"
+          echo "  - ESLint: ✅ No linting errors"
+          echo "  - Format: ✅ Code properly formatted"
+
+      - name: Post PR comment on failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Only comment on PRs, not on direct pushes
+            if (!context.payload.pull_request) {
+              return;
+            }
+
+            const { owner, repo } = context.repo;
+            const pr_number = context.payload.pull_request.number;
+
+            const comment = \`## ❌ Code Quality Check Failed
+
+            One or more code quality checks have failed. Please fix the issues locally before merging.
+
+            ### 🔧 How to fix this locally:
+
+            **Run the same checks that failed:**
+            \\\`\\\`\\\`bash
+            # Check for TypeScript errors
+            bun typecheck
+
+            # Check for linting errors
+            bun lint
+
+            # Check formatting
+            bun format
+            \\\`\\\`\\\`
+
+            **Fix common issues:**
+            \\\`\\\`\\\`bash
+            # Auto-fix linting issues (where possible)
+            bun lint --fix
+
+            # Auto-format code
+            bun format --write
+
+            # Then commit and push the fixes
+            git add .
+            git commit -m "Fix code quality issues"
+            git push origin your-branch-name
+            \\\`\\\`\\\`
+
+            ### 📋 Pre-push Hook
+            These same checks run automatically when you push code via the Husky pre-push hook.
+            Make sure your local environment is set up correctly.
+
+            ### 🛠️ Troubleshooting
+            - Make sure you have the latest dependencies: \`bun install\`
+            - Check your IDE/editor settings for TypeScript and ESLint
+            - Verify your code follows the project's formatting rules
+            \`;
+
+            github.rest.issues.createComment({
+              owner,
+              repo,
+              issue_number: pr_number,
+              body: comment
+            });

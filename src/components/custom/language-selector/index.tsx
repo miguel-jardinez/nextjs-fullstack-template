@@ -1,5 +1,9 @@
 "use client";
 import { useCallback, useId } from "react";
+import { GlobeIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
+
 import {
   Select,
   SelectContent,
@@ -9,9 +13,6 @@ import {
 } from "@template/components/ui/select";
 import { Locale } from "@template/i18n/config";
 import { setUserLocale } from "@template/services/locale";
-import { GlobeIcon } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useLocale } from "next-intl";
 
 const languages = [
   { value: "en", label: "English" },

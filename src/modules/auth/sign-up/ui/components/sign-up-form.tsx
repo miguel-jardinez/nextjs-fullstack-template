@@ -4,6 +4,10 @@ import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { IoMdMail } from "react-icons/io";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+
 import { Button } from "@template/components/ui/button";
 import {
   Form,
@@ -22,9 +26,6 @@ import {
   SignUpSchema,
   SignUpSchemaType,
 } from "@template/modules/auth/sign-up/schema";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
 const SignupForm = () => {
   const router = useRouter();

@@ -1,6 +1,6 @@
 {
   "name": "nextjs-fullstack-template",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "private": false,
   "description": "A modern, production-ready Next.js template with TypeScript, authentication, database, and comprehensive development tooling",
   "keywords": [
@@ -60,6 +60,8 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@dicebear/collection": "^9.2.3",
+    "@dicebear/core": "^9.2.3",
     "@hookform/resolvers": "^5.2.0",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-alert-dialog": "^1.1.14",
@@ -88,6 +90,7 @@
     "@radix-ui/react-toggle-group": "^1.1.10",
     "@radix-ui/react-tooltip": "^1.2.7",
     "@tanstack/react-query": "^5.83.0",
+    "@tanstack/react-table": "^8.21.3",
     "@trpc/client": "^11.4.3",
     "@trpc/server": "^11.4.3",
     "@trpc/tanstack-react-query": "^11.4.3",
@@ -96,6 +99,7 @@
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
     "date-fns": "^4.1.0",
+    "dayjs": "^1.11.13",
     "drizzle-orm": "^0.44.3",
     "embla-carousel-react": "^8.6.0",
     "input-otp": "^1.4.2",
@@ -104,6 +108,7 @@
     "next": "15.4.3",
     "next-intl": "^4.3.4",
     "next-themes": "^0.4.6",
+    "nuqs": "^2.4.3",
     "pg": "^8.16.3",
     "react": "19.1.0",
     "react-day-picker": "^9.8.0",

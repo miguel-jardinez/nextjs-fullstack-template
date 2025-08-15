@@ -1,15 +1,21 @@
 # Next.js Full-Stack Template
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Version](https://img.shields.io/badge/Version-1.2.0-green)](https://github.com/yourusername/nextjs-fullstack-template)
 [![Next.js](https://img.shields.io/badge/Next.js-15.4.3-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19.1.0-blue)](https://reactjs.org/)
-[![Bun](https://img.shields.io/badge/Bun-1.0+-black)](https://bun.sh/)
+[![Bun](https://img.shields.io/badge/Bun-1.2.0-black)](https://bun.sh/)
+[![Node.js](https://img.shields.io/badge/Node.js-21.7.3-green)](https://nodejs.org/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue)](https://www.docker.com/)
 
 A modern, production-ready Next.js template with TypeScript, authentication, database, internationalization, and comprehensive development tooling.
 
 **🚀 Ready to use out of the box with everything you need for a full-stack application!**
+
+![Landing Page Preview](./images/image_1.png)
+
+_Beautiful, responsive landing page with modern design and dark mode support_
 
 ## 📋 Table of Contents
 
@@ -31,7 +37,7 @@ A modern, production-ready Next.js template with TypeScript, authentication, dat
 
 - **Framework**: Next.js 15 with App Router
 - **Language**: TypeScript
-- **Runtime**: Bun (with Node.js fallback)
+- **Runtime**: Bun 1.2.0 (with Node.js 21.7.3 fallback)
 - **Database**: PostgreSQL with Drizzle ORM
 - **Authentication**: Better Auth with complete auth flow (sign-in, sign-up, forgot password, email verification)
 - **API**: tRPC for type-safe APIs
@@ -186,16 +192,18 @@ A modern, production-ready Next.js template with TypeScript, authentication, dat
 
 ### Prerequisites
 
-- **Node.js 18+** or **Bun 1.0+**
-- **Docker** and **Docker Compose**
+- **Node.js 21.7.3+** or **Bun 1.2.0+** (recommended)
+- **Docker** and **Docker Compose** (optional)
 - **PostgreSQL** (or use Docker)
+
+> **Note**: This template works optimally with Bun 1.2.0 and Node.js 21.7.3. While other versions may work, these are the tested and recommended versions.
 
 ### 1. Clone and Setup
 
 ```bash
 # Clone the template
 git clone <your-repo-url>
-cd personal-expenses
+cd nextjs-fullstack-template
 
 # Remove existing git history to start fresh
 rm -rf .git
@@ -205,9 +213,9 @@ git init
 git add .
 git commit -m "Initial commit from template"
 
-# Install dependencies
+# Install dependencies (Bun recommended)
 bun install
-# or
+# or with npm
 npm install
 ```
 
@@ -215,33 +223,39 @@ npm install
 
 ### 2. Environment Configuration
 
-Create a `.env` file in the root directory. You can copy from `.env.template` if it exists, or create it with the following variables:
+Create a `.env` file in the root directory using the provided template:
 
-```env
-# Database
-DATABASE_URL="postgresql://postgres:postgres@localhost:5432/expenses_db_local"
-
-# Authentication (Better Auth)
-AUTH_SECRET="your-secret-key-here"
-AUTH_URL="http://localhost:3000"
-
-# Next.js
-NEXTAUTH_URL="http://localhost:3000"
-NEXTAUTH_SECRET="your-nextauth-secret"
-
-# Public Environment Variables
-NEXT_PUBLIC_AUTH_URL="http://localhost:3000"
-
-# Email (Resend)
-RESEND_API_KEY="your-resend-api-key"
-
-# Internationalization
-NEXT_LOCALE="es" # Default locale
+```bash
+# Copy the environment template (recommended)
+cp .env.template .env
 ```
 
-**Note**: Create a `.env.template` file in your project root with the same structure but without sensitive values, so other developers can copy it to create their own `.env` file.
+Required environment variables:
+
+```env
+# Database Connection
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/expenses_db_local"
+
+# Application URLs
+APP_URL="http://localhost:3000"
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+
+# Authentication (Better Auth)
+BETTER_AUTH_SECRET="your-secret-key-here-min-32-chars"
+
+# Email Service (Resend)
+RESEND_API_KEY="your-resend-api-key"
+```
+
+**Important Notes**:
+
+- `BETTER_AUTH_SECRET` must be at least 32 characters long
+- Use the same URL for both `APP_URL` and `NEXT_PUBLIC_APP_URL` in development
+- The `.env.template` file is provided for easy setup
 
 ### 3. Database Setup
+
+#### Option A: With Docker (Recommended for database only)
 
 ```bash
 # Start PostgreSQL with Docker Compose
@@ -254,15 +268,36 @@ bun run db:push
 bun run db:studio
 ```
 
+#### Option B: Local PostgreSQL
+
+If you have PostgreSQL installed locally, update your `.env` file:
+
+```env
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/expenses_db_local"
+```
+
 ### 4. Development
 
+#### Option A: Local Development (Recommended)
+
 ```bash
-# Start development server
+# Start development server with Bun
 bun run dev
 
-# Or with Docker Compose (recommended)
+# Or with npm
+npm run dev
+```
+
+#### Option B: Full Docker Compose
+
+⚠️ **Known Issue**: There's a compatibility issue with Better Auth and Docker. See [Known Issues](#-known-issues--bug-reports) section.
+
+```bash
+# For full Docker development (not recommended due to Better Auth issue)
 docker compose up
 ```
+
+**Recommended Setup**: Use Docker only for the database (`docker compose up db -d`) and run the application locally with `bun run dev`.
 
 The application will be available at `http://localhost:3000`
 
@@ -302,14 +337,63 @@ src/modules/
 
 ### Adding New Modules
 
-When adding new features, follow this structure:
+The template includes an automated script to create new feature modules with the proper structure:
+
+#### Using the Module Creation Script
+
+```bash
+# Make the script executable (first time only)
+chmod +x create-module.sh
+
+# Create a new module (use kebab-case)
+./create-module.sh your-module-name
+
+# Examples
+./create-module.sh user-profile
+./create-module.sh account-settings
+./create-module.sh expense-tracker
+```
+
+#### What the Script Creates
+
+The script automatically generates:
+
+- **Complete module structure** with proper folder organization
+- **tRPC procedures** with CRUD operations
+- **Zod schemas** for validation
+- **TypeScript types** with proper inference
+- **React components** (views and components)
+- **Next.js page** with authentication
+- **Database schema** template
+- **Router integration** in `_app.ts`
+
+#### Generated Structure
+
+```bash
+src/modules/your-module/
+├── schema.ts                    # Zod validation schemas
+├── types.ts                     # TypeScript type definitions
+├── server/
+│   └── your-module-procedure.ts # tRPC procedures
+└── ui/
+    ├── components/              # Reusable components
+    └── views/
+        └── your-module-view.tsx # Main view component
+
+src/app/(application)/your-module/
+└── page.tsx                     # Next.js page with auth
+```
+
+#### Manual Module Creation
+
+If you prefer to create modules manually, follow this structure:
 
 ```bash
 src/modules/
 └── your-feature/
     ├── schema.ts           # Validation schemas
     ├── types.ts            # TypeScript types
-    ├── server/             # TRPC procedures
+    ├── server/             # tRPC procedures
     ├── ui/                 # UI components
     │   ├── components/     # Reusable components
     │   └── views/          # Page views
@@ -506,6 +590,10 @@ bun run typecheck    # TypeScript type checking
 bun run db:push      # Push schema to database
 bun run db:studio    # Open Drizzle Studio
 
+# Module Generation
+chmod +x create-module.sh              # Make script executable
+./create-module.sh your-module-name    # Create new feature module
+
 # Versioning (Changesets)
 bun run changeset    # Create a new changeset
 bun run version      # Version packages based on changesets
@@ -551,12 +639,10 @@ docker run -p 3000:3000 \
 
 ```env
 DATABASE_URL="postgresql://user:password@host:port/database"
-AUTH_SECRET="your-secure-secret-key"
-AUTH_URL="https://your-domain.com"
-NEXTAUTH_URL="https://your-domain.com"
-NEXTAUTH_SECRET="your-nextauth-secret"
+APP_URL="https://your-domain.com"
+NEXT_PUBLIC_APP_URL="https://your-domain.com"
+BETTER_AUTH_SECRET="your-secure-secret-key-min-32-chars"
 RESEND_API_KEY="your-resend-api-key"
-NEXT_LOCALE="es"
 ```
 
 ## 🤝 Contributing
@@ -654,6 +740,41 @@ bun run version --pre rc
 ```
 
 **Note**: The template starts at version `0.0.0`. Update the version in `package.json` when you start your actual project. Also, remember to remove the `.git` folder to start with a clean git history.
+
+---
+
+## 🐛 Known Issues & Bug Reports
+
+### Better Auth + Docker Compatibility Issue
+
+**Issue**: There's a known compatibility issue between Better Auth and Docker that may cause authentication to fail when running the full application in Docker.
+
+**Workaround**:
+
+1. Use Docker only for the database: `docker compose up db -d`
+2. Run the application locally: `bun run dev`
+3. This setup provides the best development experience while avoiding the authentication issues
+
+**Status**: This is a known issue with Better Auth in containerized environments. We're monitoring for updates.
+
+### Reporting Bugs
+
+If you encounter any issues:
+
+1. Check the [Known Issues](#-known-issues--bug-reports) section above
+2. Search existing issues in the repository
+3. Create a new issue with:
+   - Clear description of the problem
+   - Steps to reproduce
+   - Your environment (OS, Node/Bun version, Docker version)
+   - Error messages or logs
+
+### System Requirements
+
+- **Bun**: 1.2.0 (recommended)
+- **Node.js**: 21.7.3 (fallback)
+- **Docker**: Latest stable version
+- **PostgreSQL**: 16+ (via Docker or local)
 
 ---
 

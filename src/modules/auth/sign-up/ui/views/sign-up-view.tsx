@@ -1,6 +1,7 @@
-import AuthCard from "@template/components/custom/default-card";
 import Image from "next/image";
 import Link from "next/link";
+
+import AuthCard from "@template/components/custom/default-card";
 
 import SignupForm from "../components/sign-up-form";
 

@@ -2,6 +2,11 @@
 
 This document explains the Docker setup for the Next.js template, including development and production configurations with support for internationalization, email services, and modular architecture.
 
+**Template Version**: 1.2.0  
+**Recommended Runtime**: Bun 1.2.0 (Node.js 21.7.3 fallback)
+
+⚠️ **Important**: There are known compatibility issues with Better Auth and Docker. See the [Known Issues](#-known-issues--workarounds) section for recommended development setup.
+
 ## 🐳 Overview
 
 The project uses a multi-stage Dockerfile optimized for both development and production environments, along with Docker Compose for local development. The setup includes support for internationalization, email services, and the modular folder structure.
@@ -159,8 +164,24 @@ db:
 
 ### Development
 
+⚠️ **Recommended Development Setup** (due to Better Auth compatibility issues):
+
 ```bash
-# Start all services
+# Option 1: Hybrid approach (RECOMMENDED)
+# Start database only
+docker compose up db -d
+
+# Run application locally with Bun
+bun run dev
+
+# Or with npm
+npm run dev
+```
+
+**Alternative** (Full Docker - may have auth issues):
+
+```bash
+# Start all services (not recommended due to Better Auth issues)
 docker compose up
 
 # Start in background
@@ -519,4 +540,73 @@ docker compose exec app sh -c "echo 'es' > /tmp/locale"
 
 ---
 
-This Docker configuration provides a robust, secure, and performant environment for both development and production deployments, with full support for the modular architecture, internationalization, email services, and authentication features.
+## 🐛 Known Issues & Workarounds
+
+### Better Auth + Docker Compatibility Issue
+
+**Issue**: Better Auth has known compatibility issues when running in Docker containers, particularly affecting:
+
+- User authentication flows
+- Session management
+- Email verification processes
+- OAuth integrations
+
+**Root Cause**: Better Auth's session handling and cookie management may not work properly in containerized environments.
+
+**Recommended Workaround**:
+
+1. **Hybrid Development Setup** (Recommended):
+
+   ```bash
+   # Start only the database with Docker
+   docker compose up db -d
+
+   # Run the application locally
+   bun run dev  # Recommended with Bun 1.2.0
+   # or
+   npm run dev  # With Node.js 21.7.3
+   ```
+
+2. **Benefits of Hybrid Approach**:
+   - ✅ Database isolation and consistency
+   - ✅ Full authentication functionality
+   - ✅ Hot reload and fast development
+   - ✅ No container networking issues
+   - ✅ Better debugging capabilities
+
+3. **Production Deployment**:
+   - The Docker setup works fine for production deployments
+   - Issues are primarily in development environments
+   - Consider using managed services for production databases
+
+### Alternative Solutions
+
+If you need full containerization:
+
+```bash
+# Use local PostgreSQL instead of Docker
+# Update your .env file:
+DATABASE_URL="postgresql://postgres:postgres@localhost:5432/expenses_db_local"
+
+# Then run normally
+bun run dev
+```
+
+### System Requirements
+
+- **Bun**: 1.2.0 (recommended for optimal performance)
+- **Node.js**: 21.7.3 (tested fallback version)
+- **Docker**: Latest stable version (for database/production)
+- **PostgreSQL**: 16+ (local or containerized)
+
+### Reporting Issues
+
+If you encounter authentication issues:
+
+1. Try the hybrid development setup first
+2. Check Better Auth documentation for updates
+3. Report persistent issues with detailed logs
+
+---
+
+This Docker configuration provides a robust, secure, and performant environment for both development and production deployments, with full support for the modular architecture, internationalization, email services, and authentication features. The hybrid development approach ensures the best developer experience while avoiding known compatibility issues.

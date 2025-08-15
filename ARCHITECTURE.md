@@ -2,6 +2,10 @@
 
 This document provides a detailed overview of the technical architecture, backend configuration, authentication system, database design, and modular structure.
 
+**Template Version**: 1.2.0  
+**Recommended Runtime**: Bun 1.2.0 (Node.js 21.7.3 fallback)  
+**Production Ready**: ✅ Complete authentication, database, i18n, and email integration
+
 ## 🏗️ System Architecture
 
 ### High-Level Overview
@@ -654,12 +658,28 @@ src/
 ### Local Development
 
 1. **Template Setup**: Remove `.git` folder and initialize new repository
-2. **Database**: PostgreSQL with Docker Compose
-3. **Hot Reload**: File watching and automatic rebuilds
-4. **Type Checking**: Real-time TypeScript validation
-5. **Linting**: ESLint with automatic fixes
-6. **Formatting**: Prettier with organized imports
-7. **Internationalization**: Real-time i18n updates
+2. **Runtime**: Bun 1.2.0 for optimal performance (Node.js 21.7.3 fallback)
+3. **Database**: PostgreSQL with Docker Compose (recommended) or local installation
+4. **Development Mode**: Local development server (`bun run dev`) with hot reload
+5. **Type Checking**: Real-time TypeScript validation
+6. **Linting**: ESLint with automatic fixes
+7. **Formatting**: Prettier with organized imports
+8. **Internationalization**: Real-time i18n updates
+
+#### Recommended Development Setup
+
+```bash
+# Database only with Docker
+docker compose up db -d
+
+# Application with Bun (recommended)
+bun run dev
+
+# Alternative with npm
+npm run dev
+```
+
+**Note**: Full Docker Compose setup has known issues with Better Auth. Use the hybrid approach above for the best development experience.
 
 ### Testing Strategy
 
@@ -734,6 +754,40 @@ NEXT_LOCALE="es" # Default locale
 - **API Health**: Endpoint availability
 - **Application Health**: Overall system status
 - **Email Service**: Resend API health monitoring
+
+---
+
+## 🐛 Known Issues & Limitations
+
+### Better Auth + Docker Compatibility
+
+**Issue**: Better Auth has compatibility issues when running in Docker containers, which may cause authentication failures.
+
+**Impact**:
+
+- Full Docker Compose setup may not work properly for authentication flows
+- Session management and email verification may fail in containerized environments
+
+**Workaround**:
+
+```bash
+# Use Docker for database only
+docker compose up db -d
+
+# Run application locally
+bun run dev  # Recommended
+# or
+npm run dev
+```
+
+**Status**: This is a known upstream issue with Better Auth. We recommend the hybrid approach (Docker for database, local for application) for development.
+
+### System Requirements
+
+- **Bun**: 1.2.0 (recommended for optimal performance)
+- **Node.js**: 21.7.3 (tested fallback version)
+- **PostgreSQL**: 16+ (via Docker or local installation)
+- **Docker**: Latest stable (for database only in development)
 
 ---
 

@@ -149,7 +149,7 @@ const eslintConfig = [
             ["^react", "^@?\\w"],
 
             // 4. Project aliases (customize this for your project)
-            ["^@expenses(/.*|$)"],
+            ["^@template(/.*|$)"],
 
             // 5. Relative imports (./ and ../)
             ["^\\."],

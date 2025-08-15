@@ -1,5 +1,6 @@
-import AuthCard from "@template/components/custom/default-card";
 import Image from "next/image";
+
+import AuthCard from "@template/components/custom/default-card";
 
 const VerifyEmailView = () => (
   <AuthCard

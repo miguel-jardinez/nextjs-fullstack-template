@@ -3,6 +3,9 @@
 import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter, useSearchParams } from "next/navigation";
+import { toast } from "sonner";
+
 import { Button } from "@template/components/ui/button";
 import {
   Form,
@@ -14,8 +17,6 @@ import {
 } from "@template/components/ui/form";
 import { InputPassword } from "@template/components/ui/input-password";
 import { authClient } from "@template/lib/auth-client";
-import { useRouter, useSearchParams } from "next/navigation";
-import { toast } from "sonner";
 
 import {
   CreateNewPasswordSchema,

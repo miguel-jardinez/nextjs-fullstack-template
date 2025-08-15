@@ -4,6 +4,9 @@ import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import { IoMdMail } from "react-icons/io";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+
 import { Button } from "@template/components/ui/button";
 import {
   Form,
@@ -15,8 +18,6 @@ import {
 } from "@template/components/ui/form";
 import { InputWithIcon } from "@template/components/ui/input-with-icon";
 import { authClient } from "@template/lib/auth-client";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
 import { ForgetPasswordSchema, ForgetPasswordSchemaType } from "../../schema";
 
