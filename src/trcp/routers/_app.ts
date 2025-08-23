@@ -1,8 +1,11 @@
 import { z } from "zod";
 
-import { baseProcedure, createTRPCRouter } from "../init";
+import { stripeProcedure } from "@template/modules/stripe/server/stripe-procedure";
+
+import { createTRPCRouter, publicProcedure } from "../init";
+
 export const appRouter = createTRPCRouter({
-  hello: baseProcedure
+  hello: publicProcedure
     .input(
       z.object({
         text: z.string(),
@@ -11,6 +14,8 @@ export const appRouter = createTRPCRouter({
     .query(opts => ({
       greeting: `hello ${opts.input.text}`,
     })),
+
+  stripe: stripeProcedure,
 });
 // export type definition of API
 export type AppRouter = typeof appRouter;

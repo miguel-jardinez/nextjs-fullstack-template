@@ -64,6 +64,7 @@ const eslintConfig = [
       ...sonarjs.configs.recommended.rules,
       "sonarjs/void-use": "off",
       "sonarjs/todo-tag": "off",
+      "sonarjs/no-commented-code": "warn",
 
       // ========================================
       // PRETTIER INTEGRATION

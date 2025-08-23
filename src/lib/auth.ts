@@ -17,7 +17,7 @@ export const auth = betterAuth({
     sendResetPassword: async ({ url }) => {
       await RESEND_CLIENT.emails.send({
         from: "Personal template <onboarding@resend.dev>",
-        to: "jardinez.ramos.miguel@gmail.com",
+        to: process.env.HOST_EMAIL,
         subject: "Please reset your password clicking on this button",
         react: await ResetPassword({ url }),
       });
@@ -28,7 +28,7 @@ export const auth = betterAuth({
     sendVerificationEmail: async ({ url }) => {
       await RESEND_CLIENT.emails.send({
         from: "Personal template <onboarding@resend.dev>",
-        to: "jardinez.ramos.miguel@gmail.com",
+        to: process.env.HOST_EMAIL,
         subject: "Please confirm your account clicking on this button",
         react: await ConfirmAccount({
           url,
